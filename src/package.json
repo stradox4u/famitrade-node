@@ -1,0 +1,40 @@
+{
+  "name": "farmitrade-node",
+  "version": "1.0.0",
+  "description": "A node js version of farmitrade.com.ng",
+  "main": "app.js",
+  "scripts": {
+    "test": "npm test",
+    "dev": "nodemon app.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/stradox4u/farmitrade-node.git"
+  },
+  "keywords": [
+    "eCommerce",
+    "agriTech"
+  ],
+  "author": "Umar Adejoh",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/stradox4u/farmitrade-node/issues"
+  },
+  "homepage": "https://github.com/stradox4u/farmitrade-node#readme",
+  "dependencies": {
+    "bcryptjs": "^2.4.3",
+    "chai": "^4.3.4",
+    "dotenv": "^10.0.0",
+    "express": "^4.17.1",
+    "express-validator": "^6.12.1",
+    "jsonwebtoken": "^8.5.1",
+    "mocha": "^9.0.3",
+    "multer": "^1.4.2",
+    "mysql2": "^2.2.5",
+    "sequelize": "^6.6.5",
+    "sinon": "^11.1.2"
+  },
+  "devDependencies": {
+    "nodemon": "^2.0.12"
+  }
+}
