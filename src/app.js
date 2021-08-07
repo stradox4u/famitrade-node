@@ -1,22 +1,36 @@
 const express = require('express')
 require('dotenv').config()
+const cors = require('cors')
 
 const sequelize = require('./util/database')
+
+const registrationRoute = require('./routes/registrationRoute')
 
 const port = process.env.APP_PORT
 
 const app = express()
 
-app.get('/', (req, res, next) => {
-  console.log('App Working!')
-  return res.json({ message: 'App is Online!' })
-})
+app.use(express.urlencoded({ extended: true }))
+app.use(express.json())
 
-try {
+app.use(cors({
+  origin: 'localhost',
+  methods: 'GET,PUT,PATCH,POST,DELETE',
+  allowedHeaders: 'Content-Type,Authorization'
+}))
+
+app.use('/reg', registrationRoute)
+
+const checkDbConn = () => {
   return sequelize.authenticate()
-    .then(result => console.log('Connection to database successful!'))
-} catch (err) {
-  console.log('Unable to connect to database')
+    .then(connection => {
+      console.log('Connection to database successful!')
+    })
+    .catch(err => {
+      console.log('Unable to connect to database!')
+    })
 }
+
+checkDbConn()
 
 app.listen(port)
