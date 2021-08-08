@@ -30,7 +30,7 @@ exports.postLogin = async (req, res, next) => {
         }
       })
     if (!updatedUser) {
-      const error = new Error('Failed to save token!')
+      const error = new Error('Token update failed!')
       error.statusCode = 500
       throw error
     }
@@ -48,6 +48,34 @@ exports.postLogin = async (req, res, next) => {
       })
   }
   catch (err) {
+    if (!err.statusCode) {
+      err.statusCode = 500
+    }
+    next(err)
+  }
+}
+
+exports.postLogout = async (req, res, next) => {
+  if (req.user.id !== req.body.id) {
+    const error = new Error('Unauthorized')
+    error.statusCode = 403
+    throw error
+  }
+  try {
+    const updatedUser = await db.User.update({ refresh_token: null }, {
+      where: {
+        id: req.user.id
+      }
+    })
+    if (!updatedUser) {
+      const error = new Error('Token update failed!')
+      error.statusCode = 500
+      throw error
+    }
+    res.status(200).json({
+      message: 'Logged out'
+    })
+  } catch (err) {
     if (!err.statusCode) {
       err.statusCode = 500
     }

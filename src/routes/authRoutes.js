@@ -11,4 +11,9 @@ router.post('/login',
   authController.postLogin
 )
 
+router.post('/logout',
+  passport.authenticate('jwt', { session: false }),
+  authController.postLogout
+)
+
 module.exports = router
