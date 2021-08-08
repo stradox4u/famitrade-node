@@ -21,6 +21,16 @@ app.use(cors({
 
 app.use('/reg', registrationRoute)
 
+app.use((error, req, res, next) => {
+  const status = error.statusCode || 500
+  const message = error.message
+  const data = error.data
+  res.status(status).json({
+    message,
+    data
+  })
+})
+
 const checkDbConn = () => {
   return sequelize.authenticate()
     .then(connection => {
