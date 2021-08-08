@@ -36,7 +36,8 @@ module.exports = (sequelize, DataTypes) => {
     bank_name: DataTypes.STRING,
     account_number: DataTypes.STRING,
     account_verified: DataTypes.BOOLEAN,
-    recipient_code: DataTypes.STRING
+    recipient_code: DataTypes.STRING,
+    refresh_token: DataTypes.STRING
   }, {
     sequelize,
     modelName: 'User',

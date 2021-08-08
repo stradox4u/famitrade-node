@@ -3,8 +3,10 @@ require('dotenv').config()
 const cors = require('cors')
 
 const sequelize = require('./util/database')
+const passport = require('./util/passport')
 
 const registrationRoute = require('./routes/registrationRoute')
+const authRoutes = require('./routes/authRoutes')
 
 const port = process.env.APP_PORT
 
@@ -19,7 +21,10 @@ app.use(cors({
   allowedHeaders: 'Content-Type,Authorization'
 }))
 
+app.use(passport.initialize())
+
 app.use('/reg', registrationRoute)
+app.use('/auth', authRoutes)
 
 app.use((error, req, res, next) => {
   const status = error.statusCode || 500
