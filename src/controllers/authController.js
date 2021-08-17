@@ -72,6 +72,7 @@ exports.postLogout = async (req, res, next) => {
       error.statusCode = 500
       throw error
     }
+    req.logout()
     res.status(200).json({
       message: 'Logged out'
     })
