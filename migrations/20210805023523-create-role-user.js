@@ -10,6 +10,7 @@ module.exports = {
       },
       UserId: {
         type: Sequelize.UUID,
+        onDelete: 'CASCADE',
         references: {
           model: 'Users',
           key: 'id',
@@ -18,6 +19,7 @@ module.exports = {
       },
       RoleId: {
         type: Sequelize.INTEGER,
+        onDelete: 'CASCADE',
         references: {
           model: 'Roles',
           key: 'id',
