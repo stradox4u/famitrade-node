@@ -4,7 +4,6 @@ const { body } = require('express-validator')
 const authController = require('../controllers/authController')
 const passport = require('../util/passport')
 
-
 const router = express.Router()
 
 router.post('/login',
@@ -33,7 +32,8 @@ router.patch('/password/update/', [
       throw new Error('Passwords do not match!')
     }
     return true
-  })
+  }),
+  body('token').trim().isString()
 ],
   authController.patchPasswordUpdate
 )

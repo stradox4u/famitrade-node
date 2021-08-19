@@ -160,6 +160,10 @@ exports.postPasswordReset = async (req, res, next) => {
       throw error
     }
 
+    if (!user.email_verified_at) {
+      res.status(401).json({ message: 'Email is not verified' })
+    }
+
     const token = jwtHelpers.createVerifyToken(user.id)
 
     await db.User.update({ remember_token: token }, {

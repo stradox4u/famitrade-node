@@ -9,6 +9,7 @@ exports.sendVerificationEmail = async ({ ...fields }) => {
       subject: fields.subject,
       text: fields.text
     })
+    console.log(sentMail.messageId)
   }
   catch (err) {
     console.log(err)
@@ -23,6 +24,7 @@ exports.sendPasswordResetRequestEmail = async ({ ...fields }) => {
       subject: fields.subject,
       text: fields.text
     })
+    console.log(sentMail.messageId)
   } catch (err) {
     console.log(err)
   }
@@ -36,6 +38,7 @@ exports.sendSuccesfulPasswordUpdateEmail = async ({ ...fields }) => {
       subject: fields.subject,
       text: fields.text
     })
+    console.log(sentMail.messageId)
   } catch (err) {
     console.log(err)
   }

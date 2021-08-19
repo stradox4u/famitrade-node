@@ -2,7 +2,7 @@ const db = require('../../models')
 
 module.exports = async (req, res, next) => {
   try {
-    const user = await db.user.findOne({ where: { id: req.user.id } })
+    const user = await db.User.findOne({ where: { id: req.user.id } })
 
     if (!user) {
       const error = new Error('User not found!')

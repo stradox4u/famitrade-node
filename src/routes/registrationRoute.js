@@ -29,7 +29,12 @@ router.post('/register', [
     return true
   }),
   body('avatar').trim().isString().withMessage('Invalid avatar location!'),
-  body('user_type').trim().isString().escape(),
+  body('user_type').trim().isString().custom((value, { req }) => {
+    if (value !== 'farmer' && value !== 'buyer') {
+      throw new Error('Invalid user type')
+    }
+    return true
+  }),
   body('shipping_address').trim().isString().escape(),
   body('phone_number').trim().isString().isLength({ min: 11, max: 13 })
     .escape()
