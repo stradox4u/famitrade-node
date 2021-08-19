@@ -32,7 +32,7 @@ module.exports = (sequelize, DataTypes) => {
     avatar: DataTypes.STRING,
     user_type: DataTypes.STRING,
     successful_transactions: DataTypes.INTEGER,
-    email_verified_at: DataTypes.STRING,
+    email_verified_at: DataTypes.DATE,
     remember_token: DataTypes.STRING,
     shipping_address: DataTypes.STRING,
     phone_number: DataTypes.STRING,

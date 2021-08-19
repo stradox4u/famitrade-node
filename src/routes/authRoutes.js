@@ -16,4 +16,11 @@ router.post('/logout',
   authController.postLogout
 )
 
+router.post('/:userId/verify/resend',
+  passport.authenticate('jwt', { session: false }),
+  authController.resendVerificationMail
+)
+
+router.put('/verify/email', authController.putVerifyEmail)
+
 module.exports = router

@@ -22,7 +22,7 @@ exports.postRegister = async (req, res, next) => {
     const baseUrl = process.env.APP_BASE_URL
     const token = jwtHelpers.createVerifyToken(user.id)
 
-    const verifyUrl = `${baseUrl}/auth/verify/email/${token}`
+    const verifyUrl = `${baseUrl}/auth/verify/email?token=${token}`
 
     sendEmails.sendVerificationEmail({
       recipient: user.email,
