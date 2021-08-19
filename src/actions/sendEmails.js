@@ -14,3 +14,16 @@ exports.sendVerificationEmail = async ({ ...fields }) => {
     console.log(err)
   }
 }
+
+exports.sendPasswordResetRequestEmail = async ({ ...fields }) => {
+  try {
+    const sentMail = await transporter.sendMail({
+      from: "admin@farmitrade.com.ng",
+      to: fields.recipient,
+      subject: fields.subject,
+      text: fields.text
+    })
+  } catch (err) {
+    console.log(err)
+  }
+}

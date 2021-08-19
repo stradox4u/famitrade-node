@@ -1,4 +1,5 @@
 const express = require('express')
+const { body } = require('express-validator')
 
 const authController = require('../controllers/authController')
 const passport = require('../util/passport')
@@ -22,5 +23,19 @@ router.post('/:userId/verify/resend',
 )
 
 router.put('/verify/email', authController.putVerifyEmail)
+
+router.post('/password/reset', authController.postPasswordReset)
+
+router.patch('/password/update/', [
+  body('password').trim().isString().isLength({ min: 6 }),
+  body('confirm_password').custom((value, { req }) => {
+    if (value !== req.body.password) {
+      throw new Error('Passwords do not match!')
+    }
+    return true
+  })
+],
+  authController.patchPasswordUpdate
+)
 
 module.exports = router

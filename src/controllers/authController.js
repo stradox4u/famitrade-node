@@ -1,6 +1,8 @@
 const jwt = require('jsonwebtoken')
-const db = require('../../models')
+const { validationResult } = require('express-validator')
+const bcrypt = require('bcryptjs')
 
+const db = require('../../models')
 const cookieExpiry = require('../actions/cookieExpiry')
 const jwtHelpers = require('../util/jwtHelpers')
 const sendEmails = require('../actions/sendEmails')
@@ -8,6 +10,7 @@ const sendEmails = require('../actions/sendEmails')
 const accessJwtSecret = process.env.ACCESS_JWT_SECRET
 const refreshJwtSecret = process.env.REFRESH_JWT_SECRET
 const verifyJwtSecret = process.env.VERIFY_JWT_SECRET
+const baseUrl = process.env.APP_BASE_URL
 
 exports.postLogin = async (req, res, next) => {
   // Might need to refactor the req.user.Roles bit to account for multiple roles on a single user later
@@ -95,7 +98,6 @@ exports.resendVerificationMail = async (req, res, next) => {
   }
 
   const token = jwtHelpers.createVerifyToken(userId)
-  const baseUrl = process.env.APP_BASE_URL
 
   const verifyUrl = `${baseUrl}/auth/verify/email?token=${token}`
 
@@ -146,5 +148,81 @@ exports.putVerifyEmail = async (req, res, next) => {
       err.statusCode = 500
     }
     next(err)
+  }
+}
+
+exports.postPasswordReset = async (req, res, next) => {
+  const email = req.body.email
+
+  try {
+    const user = await db.User.findOne({ where: { email: email } })
+
+    if (!user) {
+      const error = new Error('User not found!')
+      error.statusCode = 404
+      throw error
+    }
+
+    const token = jwtHelpers.createVerifyToken(user.id)
+
+    const updatedUser = await db.User.update({ remember_token: token }, {
+      where: { id: user.id }
+    })
+
+    const resetUrl = `${baseUrl}/auth/password/update/${token}`
+
+    await sendEmails.sendPasswordResetRequestEmail({
+      recipient: updatedUser.email,
+      subject: "Password Reset Request",
+      text: `Hello ${updatedUser.name},
+      use this link to reset your password ${resetUrl}`
+    })
+
+    res.status(200).json({
+      message: 'Reset link sent successfully!'
+    })
+  } catch (err) {
+    if (!err.statusCode) {
+      err.statusCode = 500
+    }
+    next(err)
+  }
+}
+
+exports.patchPasswordUpdate = async (req, res, next) => {
+  const errors = validationResult(req)
+  if (!errors.isEmpty()) {
+    const error = new Error('Validation failed!')
+    error.statusCode = 422
+    res.status(422).json({
+      message: 'Validation failed!',
+      errors: errors
+    })
+    throw error
+  }
+  const token = req.params.token
+  const hashedPw = await bcrypt.hash(req.body.password, 12)
+  const decodedToken = jwtHelpers.decodeToken(token, verifyJwtSecret)
+
+  const userId = decodedToken.userId
+
+  try {
+    const updatedUser = await db.User.update({ password: hashedPw }, {
+      where: {
+        id: userId
+      }
+    })
+
+    if (!updatedUser) {
+      const error = new Error('Updating user failed!')
+      error.statusCode = 500
+      throw error
+    }
+
+    res.status(200).json({
+      message: 'Password successfully changed'
+    })
+  } catch (err) {
+
   }
 }
