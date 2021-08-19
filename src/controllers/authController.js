@@ -31,9 +31,8 @@ exports.postLogin = async (req, res, next) => {
 
     const updatedUser = await db.User.update({ refresh_token: refreshToken },
       {
-        where: {
-          id: req.user.id
-        }
+        where: { id: req.user.id },
+        returning: true
       })
     if (!updatedUser) {
       const error = new Error('Token update failed!')
@@ -69,9 +68,8 @@ exports.postLogout = async (req, res, next) => {
   }
   try {
     const updatedUser = await db.User.update({ refresh_token: null }, {
-      where: {
-        id: req.user.id
-      }
+      where: { id: req.user.id },
+      returning: true
     })
     if (!updatedUser) {
       const error = new Error('Token update failed!')
@@ -129,9 +127,8 @@ exports.putVerifyEmail = async (req, res, next) => {
 
   try {
     const updatedUser = await db.User.update({ email_verified_at: new Date() }, {
-      where: {
-        id: userId
-      }
+      where: { id: userId },
+      returning: true
     })
 
     if (!updatedUser) {
@@ -165,16 +162,16 @@ exports.postPasswordReset = async (req, res, next) => {
 
     const token = jwtHelpers.createVerifyToken(user.id)
 
-    const updatedUser = await db.User.update({ remember_token: token }, {
+    await db.User.update({ remember_token: token }, {
       where: { id: user.id }
     })
 
     const resetUrl = `${baseUrl}/auth/password/update/${token}`
 
     await sendEmails.sendPasswordResetRequestEmail({
-      recipient: updatedUser.email,
+      recipient: user.email,
       subject: "Password Reset Request",
-      text: `Hello ${updatedUser.name},
+      text: `Hello ${user.name},
       use this link to reset your password ${resetUrl}`
     })
 
@@ -200,7 +197,7 @@ exports.patchPasswordUpdate = async (req, res, next) => {
     })
     throw error
   }
-  const token = req.params.token
+  const token = req.body.token
   const hashedPw = await bcrypt.hash(req.body.password, 12)
   const decodedToken = jwtHelpers.decodeToken(token, verifyJwtSecret)
 
@@ -208,21 +205,30 @@ exports.patchPasswordUpdate = async (req, res, next) => {
 
   try {
     const updatedUser = await db.User.update({ password: hashedPw }, {
-      where: {
-        id: userId
-      }
+      where: { id: userId },
+      returning: true
     })
 
     if (!updatedUser) {
-      const error = new Error('Updating user failed!')
+      const error = new Error('Updating password failed!')
       error.statusCode = 500
       throw error
     }
+
+    await sendEmails.sendSuccesfulPasswordUpdateEmail({
+      recipient: updatedUser[1][0].dataValues.email,
+      subject: "Password Updated",
+      text: `Hello ${updatedUser[1][0].dataValues.name},
+        your password was successfully updated`
+    })
 
     res.status(200).json({
       message: 'Password successfully changed'
     })
   } catch (err) {
-
+    if (!err.statusCode) {
+      err.statusCode = 500
+    }
+    next(err)
   }
 }
