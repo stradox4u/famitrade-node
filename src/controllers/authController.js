@@ -40,6 +40,13 @@ exports.postLogin = async (req, res, next) => {
       throw error
     }
 
+    let verifiedStatus
+    if (!req.user.email_verified_at) {
+      verifiedStatus = false
+    } else {
+      verifiedStatus = true
+    }
+
     res.cookie('refresh_cookie', refreshToken, {
       expires: expiration,
       httpOnly: true
@@ -49,7 +56,8 @@ exports.postLogin = async (req, res, next) => {
         token: token,
         expires_in: 600_000,
         username: req.user.name,
-        userId: req.user.id
+        userId: req.user.id,
+        isVerified: verifiedStatus,
       })
   }
   catch (err) {
@@ -61,12 +69,12 @@ exports.postLogin = async (req, res, next) => {
 }
 
 exports.postLogout = async (req, res, next) => {
-  if (req.user.id !== req.body.id) {
-    const error = new Error('Unauthorized')
-    error.statusCode = 403
-    throw error
-  }
   try {
+    if (req.user.id !== req.body.id) {
+      const error = new Error('Forbidden!')
+      error.statusCode = 403
+      throw error
+    }
     const updatedUser = await db.User.update({ refresh_token: null }, {
       where: { id: req.user.id },
       returning: true
@@ -80,26 +88,29 @@ exports.postLogout = async (req, res, next) => {
     res.status(200).json({
       message: 'Logged out'
     })
+    return
   } catch (err) {
     if (!err.statusCode) {
       err.statusCode = 500
     }
     next(err)
+    return err
   }
 }
 
 exports.resendVerificationMail = async (req, res, next) => {
   const userId = req.params.userId
 
-  if (userId !== req.user.id) {
-    res.status(403).json({ message: 'Unauthorized!' })
-  }
-
-  const token = jwtHelpers.createVerifyToken(userId)
-
-  const verifyUrl = `${baseUrl}/auth/verify/email?token=${token}`
-
   try {
+    if (userId !== req.user.id) {
+      const error = new Error('Forbidden!')
+      error.statusCode = 403
+      throw error
+    }
+
+    const token = jwtHelpers.createVerifyToken(userId)
+    const verifyUrl = `${baseUrl}/auth/verify/email?token=${token}`
+
     await sendEmails.sendVerificationEmail({
       recipient: req.user.email,
       subject: "Please Verify Your Email Address",
@@ -110,11 +121,13 @@ exports.resendVerificationMail = async (req, res, next) => {
     res.status(200).json({
       message: 'Verifiication email sent successfully!'
     })
+    return
   } catch (err) {
     if (!err.statusCode) {
       err.statusCode = 500
     }
     next(err)
+    return err
   }
 }
 
@@ -161,7 +174,9 @@ exports.postPasswordReset = async (req, res, next) => {
     }
 
     if (!user.email_verified_at) {
-      res.status(401).json({ message: 'Email is not verified' })
+      const error = new Error('Email is not verified!')
+      error.statusCode = 401
+      throw error
     }
 
     const token = jwtHelpers.createVerifyToken(user.id)
@@ -202,16 +217,21 @@ exports.patchPasswordUpdate = async (req, res, next) => {
     throw error
   }
   const token = req.body.token
+
   const hashedPw = await bcrypt.hash(req.body.password, 12)
   const decodedToken = jwtHelpers.decodeToken(token, verifyJwtSecret)
 
   const userId = decodedToken.userId
 
   try {
-    const updatedUser = await db.User.update({ password: hashedPw }, {
-      where: { id: userId },
-      returning: true
-    })
+    const updatedUser = await db.User.update({
+      password: hashedPw,
+      remember_token: null
+    },
+      {
+        where: { id: userId },
+        returning: true
+      })
 
     if (!updatedUser) {
       const error = new Error('Updating password failed!')
