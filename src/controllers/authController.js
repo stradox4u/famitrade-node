@@ -101,15 +101,16 @@ exports.postLogout = async (req, res, next) => {
 exports.resendVerificationMail = async (req, res, next) => {
   const userId = req.params.userId
 
-  if (userId !== req.user.id) {
-    res.status(403).json({ message: 'Forbidden!' })
-  }
-
-  const token = jwtHelpers.createVerifyToken(userId)
-
-  const verifyUrl = `${baseUrl}/auth/verify/email?token=${token}`
-
   try {
+    if (userId !== req.user.id) {
+      const error = new Error('Forbidden!')
+      error.statusCode = 403
+      throw error
+    }
+
+    const token = jwtHelpers.createVerifyToken(userId)
+    const verifyUrl = `${baseUrl}/auth/verify/email?token=${token}`
+
     await sendEmails.sendVerificationEmail({
       recipient: req.user.email,
       subject: "Please Verify Your Email Address",
@@ -120,11 +121,13 @@ exports.resendVerificationMail = async (req, res, next) => {
     res.status(200).json({
       message: 'Verifiication email sent successfully!'
     })
+    return
   } catch (err) {
     if (!err.statusCode) {
       err.statusCode = 500
     }
     next(err)
+    return err
   }
 }
 
