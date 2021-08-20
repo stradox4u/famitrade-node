@@ -51,5 +51,7 @@ describe('Auth Controller', () => {
 
     await authController.resendVerificationMail(req, {}, () => { })
     expect(spy.calledOnce).to.be.true
+    jwtHelpers.createVerifyToken.restore()
+    sendEmails.sendVerificationEmail.restore()
   })
 })

@@ -9,7 +9,6 @@ module.exports = async (req, res, next) => {
       error.statusCode = 404
       throw error
     }
-
     if (!user.email_verified_at) {
       const error = new Error('Email not verified')
       error.statusCode = 401
@@ -18,5 +17,6 @@ module.exports = async (req, res, next) => {
     next()
   } catch (err) {
     next(err)
+    return err
   }
 }
