@@ -7,6 +7,7 @@ const passport = require('./util/passport')
 
 const registrationRoute = require('./routes/registrationRoute')
 const authRoutes = require('./routes/authRoutes')
+const profileRoutes = require('./routes/profileRoutes')
 
 const port = process.env.APP_PORT
 
@@ -25,6 +26,7 @@ app.use(passport.initialize())
 
 app.use('/reg', registrationRoute)
 app.use('/auth', authRoutes)
+app.use('/profile', profileRoutes)
 
 app.use((error, req, res, next) => {
   const status = error.statusCode || 500
