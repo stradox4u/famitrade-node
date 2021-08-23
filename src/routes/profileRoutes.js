@@ -24,4 +24,10 @@ router.patch('/update/:userId', [
   profileController.patchEditProfile
 )
 
+router.delete('/delete/:userId',
+  passport.authenticate('jwt', { session: false }),
+  isVerified, isOwner,
+  profileController.deleteUserProfile
+)
+
 module.exports = router
