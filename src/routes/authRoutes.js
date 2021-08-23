@@ -18,8 +18,8 @@ router.post('/logout',
 )
 
 router.post('/:userId/verify/resend',
-  isOwner,
   passport.authenticate('jwt', { session: false }),
+  isOwner,
   authController.resendVerificationMail
 )
 

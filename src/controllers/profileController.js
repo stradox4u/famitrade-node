@@ -3,6 +3,7 @@ const { validationResult } = require('express-validator')
 const updateUser = require('../actions/updateUser')
 const filterObject = require('../actions/filterInput')
 const awsActions = require('../actions/awsActions')
+const db = require('../../models')
 
 exports.patchEditProfile = async (req, res, next) => {
   try {
@@ -47,6 +48,29 @@ exports.patchEditProfile = async (req, res, next) => {
       updatedUser: updatedUser
     })
     return
+  } catch (err) {
+    if (!err.statusCode) {
+      err.statusCode = 500
+    }
+    next(err)
+    return err
+  }
+}
+
+exports.deleteUserProfile = async (req, res, next) => {
+  const userId = req.params.userId
+  try {
+    const result = await db.User.destroy({
+      where: { id: userId }
+    })
+    if (!result) {
+      const error = new Error('Deletion failed!')
+      error.statusCode = 500
+      throw error
+    }
+    res.status(200).json({
+      message: 'Deletion successful!'
+    })
   } catch (err) {
     if (!err.statusCode) {
       err.statusCode = 500
