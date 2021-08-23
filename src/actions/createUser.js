@@ -28,6 +28,8 @@ const createUser = async (input) => {
     await newUser.addRole(userRole)
 
     return newUser
+
+    // Fire event to verify the user's bank account
   }
   catch (err) {
     if (!err.statusCode) {

@@ -2,6 +2,7 @@ const express = require('express')
 const { body } = require('express-validator')
 
 const authController = require('../controllers/authController')
+const isOwner = require('../middleware/isOwner')
 const passport = require('../util/passport')
 
 const router = express.Router()
@@ -17,6 +18,7 @@ router.post('/logout',
 )
 
 router.post('/:userId/verify/resend',
+  isOwner,
   passport.authenticate('jwt', { session: false }),
   authController.resendVerificationMail
 )

@@ -15,7 +15,10 @@ exports.postRegister = async (req, res, next) => {
     })
     throw error
   }
-  const validated = { ...req.body }
+  const validated = {
+    ...req.body,
+    avatar: req.file.location
+  }
   try {
     const user = await createUser(validated)
 

@@ -28,7 +28,6 @@ router.post('/register', [
     }
     return true
   }),
-  body('avatar').trim().isString().withMessage('Invalid avatar location!'),
   body('user_type').trim().isString().custom((value, { req }) => {
     if (value !== 'farmer' && value !== 'buyer') {
       throw new Error('Invalid user type')

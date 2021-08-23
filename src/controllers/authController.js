@@ -40,13 +40,6 @@ exports.postLogin = async (req, res, next) => {
       throw error
     }
 
-    let verifiedStatus
-    if (!req.user.email_verified_at) {
-      verifiedStatus = false
-    } else {
-      verifiedStatus = true
-    }
-
     res.cookie('refresh_cookie', refreshToken, {
       expires: expiration,
       httpOnly: true
@@ -55,9 +48,7 @@ exports.postLogin = async (req, res, next) => {
       .json({
         token: token,
         expires_in: 600_000,
-        username: req.user.name,
-        userId: req.user.id,
-        isVerified: verifiedStatus,
+        user: req.user
       })
   }
   catch (err) {
@@ -102,12 +93,6 @@ exports.resendVerificationMail = async (req, res, next) => {
   const userId = req.params.userId
 
   try {
-    if (userId !== req.user.id) {
-      const error = new Error('Forbidden!')
-      error.statusCode = 403
-      throw error
-    }
-
     const token = jwtHelpers.createVerifyToken(userId)
     const verifyUrl = `${baseUrl}/auth/verify/email?token=${token}`
 
