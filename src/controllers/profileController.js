@@ -2,7 +2,7 @@ const { validationResult } = require('express-validator')
 
 const updateUser = require('../actions/updateUser')
 const filterObject = require('../actions/filterInput')
-const deleteFromAws = require('../actions/deleteAwsFile')
+const awsActions = require('../actions/awsActions')
 
 exports.patchEditProfile = async (req, res, next) => {
   try {
@@ -21,7 +21,7 @@ exports.patchEditProfile = async (req, res, next) => {
     if (req.file) {
       avatar = req.file.location
       const keyArray = req.user.avatar.split('/')
-      deleteFromAws(keyArray[keyArray.length - 1])
+      awsActions.deleteFromAws(keyArray[keyArray.length - 1])
     } else {
       avatar = req.user.avatar
     }
@@ -40,16 +40,18 @@ exports.patchEditProfile = async (req, res, next) => {
       // Fire event to verify the account number and generate recipient code
     }
 
-    const updatedUser = await updateUser(req.user.id, filtered)
+    const updatedUser = await updateUser.updateUser(req.user.id, filtered)
 
     res.status(200).json({
       message: 'User successfully updated',
       updatedUser: updatedUser
     })
+    return
   } catch (err) {
     if (!err.statusCode) {
       err.statusCode = 500
     }
-    throw err
+    next(err)
+    return err
   }
 }

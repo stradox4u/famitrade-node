@@ -2,6 +2,8 @@ const express = require('express')
 const { body } = require('express-validator')
 
 const profileController = require('../controllers/profileController')
+const isOwner = require('../middleware/isOwner')
+const isVerified = require('../middleware/isVerified')
 const passport = require('../util/passport')
 
 const router = express.Router()
@@ -18,6 +20,7 @@ router.patch('/update/:userId', [
     .withMessage('Invalid account number')
 ],
   passport.authenticate('jwt', { session: false }),
+  isVerified, isOwner,
   profileController.patchEditProfile
 )
 

@@ -15,7 +15,6 @@ exports.postRegister = async (req, res, next) => {
     })
     throw error
   }
-  console.log(req.file.location)
   const validated = {
     ...req.body,
     avatar: req.file.location

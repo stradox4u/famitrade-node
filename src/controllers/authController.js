@@ -93,12 +93,6 @@ exports.resendVerificationMail = async (req, res, next) => {
   const userId = req.params.userId
 
   try {
-    if (userId !== req.user.id) {
-      const error = new Error('Forbidden!')
-      error.statusCode = 403
-      throw error
-    }
-
     const token = jwtHelpers.createVerifyToken(userId)
     const verifyUrl = `${baseUrl}/auth/verify/email?token=${token}`
 

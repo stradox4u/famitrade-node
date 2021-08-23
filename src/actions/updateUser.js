@@ -1,6 +1,6 @@
 const db = require('../../models')
 
-const updateUser = async (id, values) => {
+exports.updateUser = async (id, values) => {
   try {
     const updatedUser = await db.User.update({ ...values }, {
       where: { id: id },
@@ -15,5 +15,3 @@ const updateUser = async (id, values) => {
     throw err
   }
 }
-
-module.exports = updateUser

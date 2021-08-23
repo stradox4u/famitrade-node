@@ -6,7 +6,7 @@ const s3 = new AWS.S3({
   region: 'af-south-1'
 })
 
-const deleteFromAws = (objKey) => {
+exports.deleteFromAws = (objKey) => {
   s3.deleteObject({
     Bucket: process.env.AWS_BUCKET_NAME,
     Key: objKey
@@ -17,5 +17,3 @@ const deleteFromAws = (objKey) => {
     }
   })
 }
-
-module.exports = deleteFromAws
