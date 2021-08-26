@@ -61,7 +61,7 @@ exports.postLogin = async (req, res, next) => {
 
 exports.postLogout = async (req, res, next) => {
   try {
-    if (req.user.id !== req.body.id) {
+    if (req.user.id !== req.params.userId) {
       const error = new Error('Forbidden!')
       error.statusCode = 403
       throw error
@@ -75,6 +75,7 @@ exports.postLogout = async (req, res, next) => {
       error.statusCode = 500
       throw error
     }
+
     req.logout()
     res.status(200).json({
       message: 'Logged out'

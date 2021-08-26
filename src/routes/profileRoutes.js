@@ -4,6 +4,7 @@ const { body } = require('express-validator')
 const profileController = require('../controllers/profileController')
 const isOwner = require('../middleware/isOwner')
 const isVerified = require('../middleware/isVerified')
+const checkToken = require('../middleware/checkBlacklistedToken')
 const passport = require('../util/passport')
 
 const router = express.Router()

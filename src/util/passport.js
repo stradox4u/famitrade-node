@@ -38,7 +38,11 @@ passport.use(new JwtStrategy({
     return db.User.findOne({ where: { id: jwt_payload.userId } })
       .then(user => {
         if (user) {
-          return done(null, user)
+          if (!user.refresh_token) {
+            return done(null, false)
+          } else {
+            return done(null, user)
+          }
         } else {
           return done(null, false)
         }
