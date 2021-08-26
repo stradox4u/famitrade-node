@@ -4,6 +4,7 @@ const updateUser = require('../actions/updateUser')
 const filterObject = require('../actions/filterInput')
 const awsActions = require('../actions/awsActions')
 const db = require('../../models')
+const paystackActions = require('../actions/paystackActions')
 
 exports.patchEditProfile = async (req, res, next) => {
   try {
@@ -39,6 +40,22 @@ exports.patchEditProfile = async (req, res, next) => {
 
     if (req.body.account_number !== req.user.account_number) {
       // Fire event to verify the account number and generate recipient code
+      const bank = await db.Bank.findOne({
+        where: {
+          name: req.body.bank_name
+        }
+      })
+      const deleted = await paystackActions
+        .deleteRecipient(req.user.id, req.user.recipient_code)
+      const recipient = await paystackActions.createRecipient({
+        name: req.user.name,
+        type: 'nuban',
+        account_number: req.body.account_number,
+        bank_code: bank.code
+      })
+
+      filtered.recipient_code = recipient.data.recipient_code
+      filtered.account_verified = true
     }
 
     const updatedUser = await updateUser.updateUser(req.user.id, filtered)

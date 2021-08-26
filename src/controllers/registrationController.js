@@ -3,6 +3,9 @@ const { validationResult } = require('express-validator')
 const createUser = require('../actions/createUser')
 const sendEmails = require('../actions/sendEmails')
 const jwtHelpers = require('../util/jwtHelpers')
+const paystackActions = require('../actions/paystackActions')
+const db = require('../../models')
+const updateUser = require('../actions/updateUser')
 
 exports.postRegister = async (req, res, next) => {
   const errors = validationResult(req)
@@ -21,6 +24,22 @@ exports.postRegister = async (req, res, next) => {
   }
   try {
     const user = await createUser(validated)
+    const bank = await db.Bank.findOne({
+      where: {
+        name: user.bank_name
+      }
+    })
+    const recipient = await paystackActions.createRecipient({
+      name: user.name,
+      type: 'nuban',
+      account_number: user.account_number,
+      bank_code: bank.code
+    })
+
+    const updatedUser = await updateUser.updateUser(user.id, {
+      recipient_code: recipient.data.recipient_code,
+      account_verified: true
+    })
 
     const baseUrl = process.env.APP_BASE_URL
     const token = jwtHelpers.createVerifyToken(user.id)
@@ -36,7 +55,7 @@ exports.postRegister = async (req, res, next) => {
 
     res.status(201).json({
       message: 'User created',
-      user: user
+      user: updatedUser
     })
   }
   catch (err) {
