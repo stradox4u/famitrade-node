@@ -6,22 +6,7 @@ const jwtHelpers = require('../src/util/jwtHelpers')
 const sendEmails = require('../src/actions/sendEmails')
 
 describe('Auth Controller', () => {
-  it('throws error on mismatch of user id on logout', async () => {
-    const req = {
-      user: {
-        id: 'loggedInUser'
-      },
-      body: {
-        id: 'notLoggedInUser'
-      }
-    }
-    const result = await authController.postLogout(req, {}, () => { })
-    expect(result).to.be.an('error')
-    expect(result).to.have.property('statusCode', 403)
-    expect(result).to.have.property('message', 'Forbidden!')
-  })
-
-  it('calls sendVerificationEmail on matching ids', async () => {
+  it('calls sendVerificationEmail if userId is supplied', async () => {
     const stub = sinon.stub(sendEmails, 'sendVerificationEmail')
     const req = {
       user: {

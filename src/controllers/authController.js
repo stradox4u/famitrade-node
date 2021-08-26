@@ -61,11 +61,6 @@ exports.postLogin = async (req, res, next) => {
 
 exports.postLogout = async (req, res, next) => {
   try {
-    if (req.user.id !== req.params.userId) {
-      const error = new Error('Forbidden!')
-      error.statusCode = 403
-      throw error
-    }
     const updatedUser = await db.User.update({ refresh_token: null }, {
       where: { id: req.user.id },
       returning: true

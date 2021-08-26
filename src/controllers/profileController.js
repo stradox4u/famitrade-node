@@ -39,7 +39,7 @@ exports.patchEditProfile = async (req, res, next) => {
     const filtered = filterObject(req.user, validated)
 
     if (req.body.account_number !== req.user.account_number) {
-      // Fire event to verify the account number and generate recipient code
+      // Fire action to generate recipient code
       const bank = await db.Bank.findOne({
         where: {
           name: req.body.bank_name
