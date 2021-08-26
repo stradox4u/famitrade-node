@@ -7,7 +7,7 @@ const myMulterS3 = require('../src/util/multerS3')
 const sequelize = require('./util/database')
 const passport = require('./util/passport')
 const paystackActions = require('./actions/paystackActions')
-const db = require('../models')
+const deleteOrphanedImages = require('../src/actions/deleteOrphanedImages')
 
 const registrationRoute = require('./routes/registrationRoute')
 const authRoutes = require('./routes/authRoutes')
