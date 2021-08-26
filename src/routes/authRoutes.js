@@ -41,4 +41,6 @@ router.patch('/password/update/', [
   authController.patchPasswordUpdate
 )
 
+router.post('/tokens/refresh/:userId', authController.postRefreshTokens)
+
 module.exports = router

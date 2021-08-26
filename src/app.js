@@ -2,12 +2,12 @@ const express = require('express')
 require('dotenv').config()
 const cors = require('cors')
 const multer = require('multer')
-const myMulterS3 = require('../src/util/multerS3')
+const cookieParser = require('cookie-parser')
 
+const myMulterS3 = require('../src/util/multerS3')
 const sequelize = require('./util/database')
 const passport = require('./util/passport')
 const paystackActions = require('./actions/paystackActions')
-const deleteOrphanedImages = require('../src/actions/deleteOrphanedImages')
 
 const registrationRoute = require('./routes/registrationRoute')
 const authRoutes = require('./routes/authRoutes')
@@ -30,6 +30,7 @@ const fileFilter = (req, file, cb) => {
 
 app.use(express.urlencoded({ extended: true }))
 app.use(express.json())
+app.use(cookieParser())
 
 app.use(cors({
   origin: 'localhost',

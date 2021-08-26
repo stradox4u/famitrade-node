@@ -11,7 +11,10 @@ passport.use(new LocalStrategy({
   passwordField: 'password'
 },
   function (username, password, done) {
-    return db.User.findOne({ where: { email: username }, include: { model: db.Role, attributes: ['name'] } })
+    return db.User.findOne({
+      where: { email: username },
+      include: { model: db.Role, attributes: ['name'] }
+    })
       .then(user => {
         if (!user) {
           return done(null, false, { message: 'Incorrect email!' })
@@ -35,7 +38,10 @@ passport.use(new JwtStrategy({
   secretOrKey: process.env.ACCESS_JWT_SECRET
 },
   function (jwt_payload, done) {
-    return db.User.findOne({ where: { id: jwt_payload.userId } })
+    return db.User.findOne({
+      where: { id: jwt_payload.userId },
+      include: { model: db.Role, attributes: ['name'] }
+    })
       .then(user => {
         if (user) {
           if (!user.refresh_token) {

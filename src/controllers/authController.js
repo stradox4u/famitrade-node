@@ -162,9 +162,14 @@ exports.postPasswordReset = async (req, res, next) => {
 
     const token = jwtHelpers.createVerifyToken(user.id)
 
-    await db.User.update({ remember_token: token }, {
-      where: { id: user.id }
-    })
+    await db.User.update({
+      remember_token: token,
+      refresh_token: null
+    },
+      {
+        where: { id: user.id }
+      }
+    )
 
     const resetUrl = `${baseUrl}/auth/password/update/${token}`
 
@@ -230,6 +235,68 @@ exports.patchPasswordUpdate = async (req, res, next) => {
     res.status(200).json({
       message: 'Password successfully changed'
     })
+  } catch (err) {
+    if (!err.statusCode) {
+      err.statusCode = 500
+    }
+    next(err)
+  }
+}
+
+exports.postRefreshTokens = async (req, res, next) => {
+  const refToken = req.cookies.refresh_cookie
+
+  const decodedToken = jwtHelpers.decodeToken(refToken, refreshJwtSecret)
+  const userId = decodedToken.userId
+
+  try {
+    const user = await db.User.findOne({
+      where: {
+        id: userId,
+        refresh_token: refToken
+      },
+      include: { model: db.Role, attributes: ['name'] }
+    })
+
+    if (!user) {
+      const error = new Error('User not found!')
+      error.statusCode = 404
+      throw error
+    }
+    const token = jwt.sign({
+      userId: user.id,
+      userRole: user.Roles[0].name
+    }, accessJwtSecret, { expiresIn: '10m' })
+
+    const expiration = cookieExpiry.getExpiry()
+
+    const refreshToken = jwt.sign({
+      userId: user.id
+    },
+      refreshJwtSecret,
+      { expiresIn: '7d' }
+    )
+
+    const updatedUser = await db.User.update({ refresh_token: refreshToken },
+      {
+        where: { id: user.id },
+        returning: true
+      })
+    if (!updatedUser) {
+      const error = new Error('Token update failed!')
+      error.statusCode = 500
+      throw error
+    }
+
+    res.cookie('refresh_cookie', refreshToken, {
+      expires: expiration,
+      httpOnly: true
+    })
+      .status(200)
+      .json({
+        token: token,
+        expires_in: 600_000
+      })
   } catch (err) {
     if (!err.statusCode) {
       err.statusCode = 500
