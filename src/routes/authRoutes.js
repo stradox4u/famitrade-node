@@ -3,6 +3,7 @@ const { body } = require('express-validator')
 
 const authController = require('../controllers/authController')
 const isOwner = require('../middleware/isOwner')
+const checkToken = require('../middleware/checkBlacklistedToken')
 const passport = require('../util/passport')
 
 const router = express.Router()
@@ -12,7 +13,7 @@ router.post('/login',
   authController.postLogin
 )
 
-router.post('/logout',
+router.post('/logout/:userId',
   passport.authenticate('jwt', { session: false }),
   authController.postLogout
 )
