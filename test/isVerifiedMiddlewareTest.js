@@ -6,7 +6,7 @@ const db = require('../models')
 const isVerified = require('../src/middleware/isVerified')
 
 describe('Is Verified Middleware', () => {
-  it('throws the correct error if user is not verified', async () => {
+  it('Throws the correct error if user is not verified', async () => {
     const req = {
       user: {
         id: 'lowesboro'

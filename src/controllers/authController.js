@@ -12,6 +12,16 @@ const refreshJwtSecret = process.env.REFRESH_JWT_SECRET
 const verifyJwtSecret = process.env.VERIFY_JWT_SECRET
 const baseUrl = process.env.APP_BASE_URL
 
+/**
+* Function handling the login route
+* @param {object} req An http request object
+* @param {object} res A returnable http response object
+* @param {function} next A function to pass the request to the next handler
+*    in the route path
+* @return {object} Returns an http response with valid json, an error or
+*   passes the request to the next handler
+*/
+
 exports.postLogin = async (req, res, next) => {
   // Might need to refactor the req.user.Roles bit to account for multiple roles on a single user later
   try {
@@ -59,6 +69,16 @@ exports.postLogin = async (req, res, next) => {
   }
 }
 
+/**
+* Function handling the logout route
+* @param {object} req An http request object
+* @param {object} res A returnable http response object
+* @param {function} next A function to pass the request to the next handler
+*    in the route path
+* @return {object} Returns an http response with valid json, an error or
+*   passes the request to the next handler
+*/
+
 exports.postLogout = async (req, res, next) => {
   try {
     const updatedUser = await db.User.update({ refresh_token: null }, {
@@ -75,15 +95,23 @@ exports.postLogout = async (req, res, next) => {
     res.status(200).json({
       message: 'Logged out'
     })
-    return
   } catch (err) {
     if (!err.statusCode) {
       err.statusCode = 500
     }
     next(err)
-    return err
   }
 }
+
+/**
+* Function handling the resend verification email route
+* @param {object} req An http request object
+* @param {object} res A returnable http response object
+* @param {function} next A function to pass the request to the next handler
+*    in the route path
+* @return {object} Returns an http response with valid json, an error or
+*   passes the request to the next handler
+*/
 
 exports.resendVerificationMail = async (req, res, next) => {
   const userId = req.params.userId
@@ -102,15 +130,23 @@ exports.resendVerificationMail = async (req, res, next) => {
     res.status(200).json({
       message: 'Verifiication email sent successfully!'
     })
-    return
   } catch (err) {
     if (!err.statusCode) {
       err.statusCode = 500
     }
     next(err)
-    return err
   }
 }
+
+/**
+* Function handling the verify email route
+* @param {object} req An http request object
+* @param {object} res A returnable http response object
+* @param {function} next A function to pass the request to the next handler
+*    in the route path
+* @return {object} Returns an http response with valid json, an error or
+*   passes the request to the next handler
+*/
 
 exports.putVerifyEmail = async (req, res, next) => {
   const token = req.query.token
@@ -141,6 +177,16 @@ exports.putVerifyEmail = async (req, res, next) => {
     next(err)
   }
 }
+
+/**
+* Function handling the request password reset route
+* @param {object} req An http request object
+* @param {object} res A returnable http response object
+* @param {function} next A function to pass the request to the next handler
+*    in the route path
+* @return {object} Returns an http response with valid json, an error or
+*   passes the request to the next handler
+*/
 
 exports.postPasswordReset = async (req, res, next) => {
   const email = req.body.email
@@ -188,8 +234,19 @@ exports.postPasswordReset = async (req, res, next) => {
       err.statusCode = 500
     }
     next(err)
+    return err
   }
 }
+
+/**
+* Function handling the password reset route
+* @param {object} req An http request object
+* @param {object} res A returnable http response object
+* @param {function} next A function to pass the request to the next handler
+*    in the route path
+* @return {object} Returns an http response with valid json, an error or
+*   passes the request to the next handler
+*/
 
 exports.patchPasswordUpdate = async (req, res, next) => {
   const errors = validationResult(req)
@@ -240,8 +297,19 @@ exports.patchPasswordUpdate = async (req, res, next) => {
       err.statusCode = 500
     }
     next(err)
+    return err
   }
 }
+
+/**
+* Function handling the refresh tokens route
+* @param {object} req An http request object
+* @param {object} res A returnable http response object
+* @param {function} next A function to pass the request to the next handler
+*    in the route path
+* @return {object} Returns an http response with valid json, an error or
+*   passes the request to the next handler
+*/
 
 exports.postRefreshTokens = async (req, res, next) => {
   const refToken = req.cookies.refresh_cookie
@@ -260,7 +328,7 @@ exports.postRefreshTokens = async (req, res, next) => {
 
     if (!user) {
       const error = new Error('User not found!')
-      error.statusCode = 404
+      error.statusCode = 400
       throw error
     }
     const token = jwt.sign({
