@@ -4,6 +4,7 @@
   "description": "A node js version of farmitrade.com.ng",
   "main": "app.js",
   "scripts": {
+    "start": "node ./src/app.js",
     "test": "mocha",
     "dev": "nodemon ./src/app.js"
   },
